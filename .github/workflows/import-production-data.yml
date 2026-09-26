@@ -1,0 +1,51 @@
+name: Import NE S27 production data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - migration/ne-s27-production-data.bin
+      - scripts/migration-key.mjs
+      - .github/workflows/import-production-data.yml
+
+concurrency:
+  group: ne-s27-production-data-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+      CLOUDFLARE_D1_PREVIEW_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_PREVIEW_DATABASE_ID }}
+      MIGRATION_KEY_SOURCE: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/cloudflare-config.mjs
+      - name: Decrypt private migration payload
+        run: |
+          node scripts/migration-key.mjs decrypt migration/ne-s27-production-data.bin /tmp/ne-s27-production.tar.gz
+          mkdir -p /tmp/ne-s27-import
+          tar -xzf /tmp/ne-s27-production.tar.gz -C /tmp/ne-s27-import
+      - name: Import production data
+        run: |
+          set -euo pipefail
+          for file in /tmp/ne-s27-import/*.sql; do
+            if ! npx wrangler d1 execute DB --remote --file="$file" --config wrangler.deploy.json >/tmp/ne-s27-import-result 2>&1; then
+              echo "::error::Production data import failed at $(basename "$file")"
+              exit 1
+            fi
+            echo "Imported $(basename "$file")"
+          done
+      - name: Verify imported row counts
+        run: |
+          npx wrangler d1 execute DB --remote --config wrangler.deploy.json --json --command +            "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM user_cards) AS user_cards, (SELECT COUNT(*) FROM site_settings) AS site_settings, (SELECT COUNT(*) FROM operations) AS operations, (SELECT COUNT(*) FROM audit_log) AS audit_log;"
