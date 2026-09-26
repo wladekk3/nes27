@@ -1,0 +1,8 @@
+import fs from 'node:fs';import ts from 'typescript';
+// One-time migration: translate rendered text without changing IDs, state or comparisons.
+for(const file of fs.readdirSync('app').filter(f=>f.endsWith('.tsx')&&!['layout.tsx','page.tsx','language.tsx'].includes(f))){const path='app/'+file;let text=fs.readFileSync(path,'utf8');const src=ts.createSourceFile(path,text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),edits=[];
+ function visit(n){if(ts.isJsxText(n)&&n.text.trim()&&/[А-Яа-яЁё]/.test(n.text)){const v=n.text.replace(/\s+/g,' ');edits.push([n.getStart(src),n.end,'{tr('+JSON.stringify(v)+')}']);return;}
+ if(ts.isJsxExpression(n)&&n.expression&&(ts.isJsxElement(n.parent)||ts.isJsxFragment(n.parent))){const e=n.expression;if(!ts.isJsxElement(e)&&!ts.isJsxSelfClosingElement(e)&&!ts.isJsxFragment(e)){edits.push([e.getStart(src),e.getStart(src),'tr(']);edits.push([e.end,e.end,')']);}}
+ if(ts.isJsxAttribute(n)&&['title','placeholder','aria-label','alt'].includes(n.name.getText(src))&&n.initializer){if(ts.isStringLiteral(n.initializer)&&/[А-Яа-яЁё]/.test(n.initializer.text))edits.push([n.initializer.getStart(src),n.initializer.end,'{tr('+JSON.stringify(n.initializer.text)+')}']);else if(ts.isJsxExpression(n.initializer)&&n.initializer.expression){const e=n.initializer.expression;edits.push([e.getStart(src),e.getStart(src),'tr('],[e.end,e.end,')']);}}
+ ts.forEachChild(n,visit);}
+ visit(src);for(const [a,b,v] of edits.sort((x,y)=>y[0]-x[0]||y[1]-x[1]))text=text.slice(0,a)+v+text.slice(b);if(edits.length)text=text.replace(/(['"]use client['"];?)/,'$1\nimport {tr} from "@/lib/i18n";');fs.writeFileSync(path,text);}

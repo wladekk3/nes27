@@ -1,0 +1,4 @@
+'use client';
+import {tr} from "@/lib/i18n";
+import {useEffect,useState} from 'react';
+export function GuildPulse(){const [stats,setStats]=useState<any>(null);useEffect(()=>{let active=true;async function update(){try{const r=await fetch('/api/guild-stats');if(r.ok&&active)setStats(await r.json());}catch{}}void update();const timer=setInterval(update,60000);return()=>{active=false;clearInterval(timer);};},[]);return <aside className="guild-pulse"><div><small>{tr("СИГНАЛ С ПЕРИМЕТРА")}</small><b>{tr("СООБЩЕСТВО NE S27")}</b></div><div><strong>{tr(stats?.members?.toLocaleString('ru-RU')??'—')}</strong><span>{tr("УЧАСТНИКОВ")}</span></div><p>{tr(stats?.updatedAt?`Обновлено ${new Date(stats.updatedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}${stats.stale?' · ожидаем новый сигнал':''}`:'Счётчик появится после подключения бота')}</p></aside>;}

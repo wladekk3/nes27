@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+const source=ts.transpileModule(fs.readFileSync('lib/reveal-geometry.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText;
+const g=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const weights=[5500,3800,500,180,20];
+test('near-edge and central reel landings select the winning hitbox at desktop and phone widths',()=>{for(const width of [84,120])for(let index=26;index<=32;index++)for(const sample of [0,.001,.1,.5,.9,.999999]){const f=g.landingFraction(sample),x=g.caseLanding(index,width,12,f);assert.equal(Math.floor(x/(width+12)),index);assert.ok(x-index*(width+12)>0);assert.ok(x-index*(width+12)<width);}assert.ok(g.landingFraction(0)<.02);assert.ok(g.landingFraction(.999999)>.98);});
+test('wheel final pointer remains in correct sector including 0.2% mythic at both edges',()=>{for(let rank=0;rank<5;rank++)for(const sample of [0,.001,.5,.999999]){const a=g.wheelLanding(weights,rank,g.landingFraction(sample));const rotation=7*360+360-a;const pointer=((360-rotation%360)%360+360)%360;const lower=weights.slice(0,rank).reduce((a,b)=>a+b,0)*.036;assert.ok(pointer>lower&&pointer<lower+weights[rank]*.036);}});
+test('presentation randomness varies independently without changing reward pool',()=>{const values=Array.from({length:40},()=>g.randomPresentation());assert.ok(new Set(values.map(x=>x.fraction)).size>35);for(const x of values){assert.ok(x.index>=26&&x.index<=32);assert.ok(x.fraction>0&&x.fraction<1);}});

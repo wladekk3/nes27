@@ -1,0 +1,2 @@
+import {getD1} from '@/lib/s27-server';
+export async function GET(){try{const row=await getD1().prepare("SELECT value,updated_at FROM site_settings WHERE key='guild_stats'").first<any>();if(!row)return Response.json({members:null,updatedAt:null},{headers:{'Cache-Control':'no-store'}});return Response.json({...JSON.parse(row.value),updatedAt:row.updated_at,stale:Date.now()-row.updated_at>180000},{headers:{'Cache-Control':'public, max-age=30'}});}catch{return Response.json({members:null,updatedAt:null},{status:503});}}

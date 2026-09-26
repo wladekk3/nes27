@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ne-s27-zone",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-09-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "assets": { "directory": "dist/client", "binding": "ASSETS" },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "ne-s27-production",
+    "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+    "migrations_dir": "drizzle"
+  }],
+  "vars": {
+    "SITE_BASE_URL": "https://ne-s27-zone.YOUR_ACCOUNT_SUBDOMAIN.workers.dev",
+    "ENABLE_TEST_LOGIN": "0"
+  }
+}

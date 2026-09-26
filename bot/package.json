@@ -1,0 +1,17 @@
+{
+  "name": "ne-s27-discord-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node --env-file=.env src/index.mjs",
+    "register": "node --env-file=.env src/register-commands.mjs",
+    "check": "node --check src/index.mjs && node --check src/commands.mjs && node --check src/register-commands.mjs"
+  },
+  "dependencies": {
+    "discord.js": "^14.22.1"
+  }
+}

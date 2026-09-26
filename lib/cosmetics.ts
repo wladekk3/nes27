@@ -1,0 +1,44 @@
+export type CosmeticSlot='cursor'|'frame'|'banner'|'effect'|'reveal'|'theme'|'click'|'sound';
+export type Cosmetic={id:string;name:string;slot:CosmeticSlot;price:number;description:string;image?:string;accent?:string};
+export const cosmetics:Cosmetic[]=[
+{id:'sound-paper',name:'АРХИВНАЯ БУМАГА',slot:'sound',price:320,description:'Короткий шелест плотной бумаги при нажатии.',image:'/cosmetics/banner-4.webp'},
+{id:'sound-switch',name:'ТУМБЛЕР',slot:'sound',price:360,description:'Двойной приглушённый щелчок старого переключателя.',image:'/cosmetics/vault.webp'},
+{id:'sound-rain',name:'КАПЛИ',slot:'sound',price:340,description:'Два лёгких хлопка с разной глубиной.',image:'/cosmetics/banner-2.webp'},
+{id:'theme-copper',name:'МЕДНЫЙ КОНТАКТ',slot:'theme',price:420,description:'Медные акценты и тёмный корпус терминала.',accent:'#d18c62',image:'/cosmetics/banner-1.webp'},
+{id:'theme-violet',name:'ПСИ-ПОЛЕ',slot:'theme',price:460,description:'Фиолетовые акценты аномальной частоты.',accent:'#b49bdd',image:'/cosmetics/banner-3.webp'},
+{id:'theme-steel',name:'СТАЛЬ',slot:'theme',price:400,description:'Холодный серебристый акцент без ярких цветов.',accent:'#c2ced1',image:'/cosmetics/banner-2.webp'},
+{id:'theme-teal',name:'ГЛУБИННЫЙ СИГНАЛ',slot:'theme',price:440,description:'Бирюзовые приборы подземной лаборатории.',accent:'#75c4b4',image:'/cosmetics/banner-4.webp'},
+{id:'click-rings',name:'ЭХО ДЕТЕКТОРА',slot:'click',price:300,description:'Две расходящиеся волны в точке нажатия.',accent:'#75c4b4'},
+{id:'click-dust',name:'ПЫЛЬ АРХИВА',slot:'click',price:280,description:'Короткий веер приглушённых частиц.',accent:'#c6b28c'},
+{id:'effect-scan',name:'ПОЛОСА СКАНЕРА',slot:'effect',price:780,description:'Медленная полоса сканирования проходит по досье.',image:'/cosmetics/banner-2.webp'},
+{id:'effect-embers',name:'УГЛИ КОСТРА',slot:'effect',price:850,description:'Тёплые движущиеся блики на фоне профиля.',image:'/cosmetics/banner-1.webp'},
+
+{id:'sound-crystal',name:'РЕЗОНАНС',slot:'sound',price:230,description:'Сухой щелчок затвора с лёгким механическим хвостом.',image:'/cosmetics/banner-2.webp'},
+{id:'sound-vault',name:'ГЛУБИНА',slot:'sound',price:290,description:'Приглушённая защёлка и короткий отклик механизма.',image:'/cosmetics/vault.webp'},
+{id:'sound-orbit',name:'ОРБИТА',slot:'sound',price:340,description:'Низкий мягкий хлопок без музыкальных нот.',image:'/cosmetics/banner-4.webp'},
+
+{id:'ember-cursor',name:'ИСКРА',slot:'cursor',price:920,description:'Янтарный след за указателем. Для компьютера.',accent:'#e3a34d'},
+{id:'anomaly-frame',name:'ЛЕДЯНОЙ КОНТУР',slot:'frame',price:750,description:'Обледеневший металл и осколки вокруг аватара.',image:'/cosmetics/frame-2.png'},
+{id:'night-banner',name:'НОЧНОЙ ПЕРИМЕТР',slot:'banner',price:1090,description:'Замёрзшая железная дорога под холодным небом.',image:'/cosmetics/banner-2.webp'},
+{id:'signal-aura',name:'ЖИВОЙ СИГНАЛ',slot:'effect',price:1380,description:'Медленная световая волна по личному досье.',image:'/cosmetics/banner-1.webp'},
+{id:'aurora-reveal',name:'ПОЛЯРНОЕ СИЯНИЕ',slot:'reveal',price:1610,description:'Северное свечение в сцене раскрытия карты.',image:'/cosmetics/banner-2.webp'},
+{id:'detector-frame',name:'ДЕТЕКТОР',slot:'frame',price:800,description:'Механический обод с датчиками и янтарными лампами.',image:'/cosmetics/frame-1.png'},
+{id:'thorn-frame',name:'КРАСНЫЙ КОНТУР',slot:'frame',price:980,description:'Опасное переплетение кабелей и багровых шипов.',image:'/cosmetics/frame-3.png'},
+{id:'filter-frame',name:'ВЕТЕРАН ПЕРИМЕТРА',slot:'frame',price:690,description:'Фильтры, потёртый металл и детали полевого снаряжения.',image:'/cosmetics/frame-4.png'},
+{id:'reactor-banner',name:'ПОСЛЕ СМЕНЫ',slot:'banner',price:520,description:'Тёплый свет покинутого реакторного зала.',image:'/cosmetics/banner-1.webp'},
+{id:'storm-banner',name:'НЕБО ПЕРЕД ВЫБРОСОМ',slot:'banner',price:630,description:'Багровый шторм над крышами мёртвого города.',image:'/cosmetics/banner-3.webp'},
+{id:'bunker-banner',name:'ТИХОЕ УБЕЖИЩЕ',slot:'banner',price:460,description:'Заросший бункер, в котором ещё можно переждать ночь.',image:'/cosmetics/banner-4.webp'},
+{id:'theme-amber',name:'СТАРЫЙ КПК',slot:'theme',price:290,description:'Тёплый янтарный акцент для твоего сайта.',accent:'#d6a548',image:'/cosmetics/banner-1.webp'},
+{id:'theme-frost',name:'EVERFROST',slot:'theme',price:400,description:'Ледяной голубой акцент и холодные панели.',accent:'#6dbed3',image:'/cosmetics/banner-2.webp'},
+{id:'theme-crimson',name:'БАГРОВЫЙ СИГНАЛ',slot:'theme',price:400,description:'Приглушённый красный акцент для терминала.',accent:'#e18477',image:'/cosmetics/banner-3.webp'},
+{id:'theme-olive',name:'ПОЛЕВОЙ ТЕРМИНАЛ',slot:'theme',price:290,description:'Оливковые кнопки и зелёный свет приборов.',accent:'#abc17b',image:'/cosmetics/banner-4.webp'},
+{id:'click-sparks',name:'ВЫСЕЧЬ ИСКРУ',slot:'click',price:230,description:'Короткий веер искр при нажатии на кнопку.',accent:'#efbe61'},
+{id:'click-pulse',name:'ПСИ-ИМПУЛЬС',slot:'click',price:290,description:'Тихая синяя волна от точки нажатия.',accent:'#75bced'},
+{id:'click-impact',name:'ПОПАДАНИЕ',slot:'click',price:340,description:'Короткая вспышка прицела без громкого выстрела.',accent:'#d8d5ba'},
+{id:'wheel-reveal',name:'КОЛЕСО ЗОНЫ',slot:'reveal',price:580,description:'Стрелка останавливается на цвете выпавшей редкости.',image:'/cosmetics/banner-1.webp'},
+{id:'case-reveal',name:'ЛЕНТА КЕЙСА',slot:'reveal',price:460,description:'Карточки проносятся под указателем и плавно останавливаются.',image:'/cosmetics/banner-3.webp'},
+{id:'scanner-reveal',name:'СКАНЕР АРТЕФАКТОВ',slot:'reveal',price:400,description:'Терминал постепенно расшифровывает найденное досье.',image:'/cosmetics/banner-4.webp'},
+{id:'classic-cursor',name:'КУРСОР СТАЛКЕРА',slot:'cursor',price:230,description:'Классическая стрелка со знаком радиации. Для компьютера.',accent:'#d6c8a1',image:'/cosmetics/stalker-cursor-preview.png'},
+];
+export const slotNames:Record<CosmeticSlot,string>={cursor:'Курсоры',frame:'Рамки аватара',banner:'Баннеры',effect:'Эффекты профиля',reveal:'Открытие тайников',theme:'Темы сайта',click:'Эффекты нажатия',sound:'Наборы звуков'};
+export const avatars:Record<string,string>={silverhand:'/cards/card_001_silverhand.jpg',vlad:'/cards/card_002_vlad.jpg',shinigami:'/cards/card_003_shinigami.jpg',zuban:'/cards/card_004_zuban.jpg',oleg:'/cards/card_005_oleg.jpg',qwtep:'/cards/card_006_qwtep.jpg',myatus:'/cards/card_007_myatus.png',lexa:'/cards/card_008_lexa.webp'};
