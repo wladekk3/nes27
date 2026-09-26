@@ -46,17 +46,17 @@ for n in range(1,7):
  con.execute("INSERT INTO referrals(referrer_user_id,referred_user_id,invite_code,status,reward_tokens,verify_after,created_at) VALUES ('u',?,'test','pending',0,0,0)",(str(n),));con.commit()
  for _ in range(2):
   with con:
-   con.execute(refs[0],(1,n));con.execute(refs[1],('u',1,'u'));con.execute(refs[2],('u',1))
+   con.execute(verify_referral,(1,n));con.execute(reward_referrer,('u',1,'u'));con.execute(audit_referral,('u',1))
  assert con.execute('SELECT tokens FROM users WHERE discord_id=\'u\'').fetchone()[0]==n//2
 print('PASS: migrations, debit rollback, idempotency, one card, protected last copy, shop debit, 2 referrals/coupon, replay protection')
 
-con.execute("UPDATE users SET tokens=2 WHERE discord_id='u'");con.commit()
+con.execute("UPDATE users SET tokens=1 WHERE discord_id='u'");con.commit()
 old=con.execute("SELECT count FROM user_cards WHERE user_id='u' AND card_slug='lexa'").fetchone()[0]
-assert not open_cache('triple-no-balance',3)
-assert con.execute("SELECT tokens FROM users WHERE discord_id='u'").fetchone()[0]==2
-con.execute("UPDATE users SET tokens=3 WHERE discord_id='u'");con.commit()
-assert open_cache('triple',3)
-assert not open_cache('triple',3)
-assert con.execute("SELECT count FROM user_cards WHERE user_id='u' AND card_slug='lexa'").fetchone()[0]==old+3
+assert not open_cache('double-no-balance',2)
+assert con.execute("SELECT tokens FROM users WHERE discord_id='u'").fetchone()[0]==1
+con.execute("UPDATE users SET tokens=2 WHERE discord_id='u'");con.commit()
+assert open_cache('double',2)
+assert not open_cache('double',2)
+assert con.execute("SELECT count FROM user_cards WHERE user_id='u' AND card_slug='lexa'").fetchone()[0]==old+2
 assert con.execute("SELECT tokens FROM users WHERE discord_id='u'").fetchone()[0]==0
-print('PASS: 3 caches atomically debit 3 coupons and grant 3 cards; insufficient funds and replay do not change balances')
+print('PASS: 2 caches atomically debit 2 coupons and grant 2 cards; insufficient funds and replay do not change balances')
