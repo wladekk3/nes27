@@ -48,4 +48,5 @@ jobs:
           done
       - name: Verify imported row counts
         run: |
-          npx wrangler d1 execute DB --remote --config wrangler.deploy.json --json --command +            "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM user_cards) AS user_cards, (SELECT COUNT(*) FROM site_settings) AS site_settings, (SELECT COUNT(*) FROM operations) AS operations, (SELECT COUNT(*) FROM audit_log) AS audit_log;"
+          npx wrangler d1 execute DB --remote --config wrangler.deploy.json --json --command \
+            "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM user_cards) AS user_cards, (SELECT COUNT(*) FROM site_settings) AS site_settings, (SELECT COUNT(*) FROM operations) AS operations, (SELECT COUNT(*) FROM audit_log) AS audit_log;"
