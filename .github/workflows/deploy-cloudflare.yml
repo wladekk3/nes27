@@ -32,5 +32,7 @@ jobs:
       - run: npm test
       - run: node scripts/cloudflare-config.mjs
       - run: npx wrangler d1 migrations apply DB --remote --config wrangler.deploy.json
-      - run: printf '%s' "$BOT_WEBHOOK_SECRET" | npx wrangler secret put BOT_WEBHOOK_SECRET --config wrangler.deploy.json
+      - name: Configure Discord bot webhook secret
+        if: env.BOT_WEBHOOK_SECRET != ''
+        run: printf '%s' "$BOT_WEBHOOK_SECRET" | npx wrangler secret put BOT_WEBHOOK_SECRET --config wrangler.deploy.json
       - run: npx wrangler deploy --config wrangler.deploy.json
