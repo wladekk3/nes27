@@ -2,7 +2,7 @@
 
 Updated 12 September 2026. This document supersedes earlier bot prompts.
 Build only the Discord bot for bot-hosting.net. The website already exists.
-Production site: https://ne-s27-zone.vladiksestakov476333.chatgpt.site
+Production site: https://ne-s27-zone.r9d8npjbr7.workers.dev
 
 ## Русская инструкция подключения
 

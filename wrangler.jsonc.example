@@ -13,7 +13,7 @@
     "migrations_dir": "drizzle"
   }],
   "vars": {
-    "SITE_BASE_URL": "https://ne-s27-zone.YOUR_ACCOUNT_SUBDOMAIN.workers.dev",
+    "SITE_BASE_URL": "https://ne-s27-zone.r9d8npjbr7.workers.dev",
     "ENABLE_TEST_LOGIN": "0"
   }
 }

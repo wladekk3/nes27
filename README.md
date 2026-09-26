@@ -49,8 +49,8 @@ Add these GitHub Actions secrets to `wladekk3/nes27`:
 
 The workflow generates an ignored deployment config, applies migrations and deploys to:
 
-- production: `https://ne-s27-zone.<account-subdomain>.workers.dev`
-- preview: `https://ne-s27-preview.<account-subdomain>.workers.dev`
+- production: `https://ne-s27-zone.r9d8npjbr7.workers.dev`
+- preview: `https://ne-s27-preview.r9d8npjbr7.workers.dev`
 
 `wrangler.jsonc.example` documents the equivalent manual configuration.
 
@@ -89,7 +89,7 @@ Recommended release flow:
 The bot is in `bot/` and uses `bot/.env.example`. After production is verified, set:
 
 ```env
-SITE_BASE_URL=https://ne-s27-zone.<account-subdomain>.workers.dev
+SITE_BASE_URL=https://ne-s27-zone.r9d8npjbr7.workers.dev
 ```
 
 Keep `DISCORD_BOT_TOKEN` and `BOT_WEBHOOK_SECRET` only in the bot host's secret settings. `/connect`, `/invite`, referral attribution, news sync and prize tickets use the signed Worker API.

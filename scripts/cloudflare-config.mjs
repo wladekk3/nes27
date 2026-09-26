@@ -12,6 +12,11 @@ const config = {
   workers_dev: true,
   assets: { directory: "dist/client", binding: "ASSETS" },
   d1_databases: [{ binding: "DB", database_name: production ? "ne-s27-production" : "ne-s27-preview", database_id: databaseId, migrations_dir: "drizzle" }],
-  vars: { SITE_BASE_URL: process.env.SITE_BASE_URL, ADMIN_DISCORD_IDS: process.env.ADMIN_DISCORD_IDS ?? "", MANAGER_DISCORD_IDS: process.env.MANAGER_DISCORD_IDS ?? "", ENABLE_TEST_LOGIN: "0" },
+  vars: {
+    SITE_BASE_URL: process.env.SITE_BASE_URL || "https://ne-s27-zone.r9d8npjbr7.workers.dev",
+    ADMIN_DISCORD_IDS: process.env.ADMIN_DISCORD_IDS || "684786698512760890",
+    MANAGER_DISCORD_IDS: process.env.MANAGER_DISCORD_IDS ?? "",
+    ENABLE_TEST_LOGIN: "0",
+  },
 };
 writeFileSync("wrangler.deploy.json", `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
