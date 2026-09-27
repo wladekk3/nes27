@@ -1113,7 +1113,7 @@ export default function TerminalApp() {
 
             <div className="home-section-label"><span>{tr("СЕЗОНЫ NE S27")}</span><small>{tr("ОДНА ЗОНА // НОВАЯ ГЛАВА")}</small></div>
             <GuildPulse/>
-            <section className="site-counter panel"><span><Users/><b>{siteStats.visitors.toLocaleString(locale)}</b><small>{locale==='en'?'UNIQUE VISITORS':'ЛЮДЕЙ ЗАШЛО'}</small></span><span><Fingerprint/><b>{siteStats.accounts.toLocaleString(locale)}</b><small>{locale==='en'?'NEW ACCOUNTS':'НОВЫХ АККАУНТОВ'}</small></span></section>
+            <section className="site-counter panel"><span><Users/><b>{siteStats.visitors.toLocaleString(locale)}</b><small>{locale==='en'?'UNIQUE VISITORS':'ЛЮДЕЙ ЗАШЛО'}</small></span><span><Fingerprint/><b>{siteStats.accounts.toLocaleString(locale)}</b><small>{locale==='en'?'ACCOUNTS SIGNED IN':'АККАУНТОВ ВОШЛО'}</small></span></section>
             <section className="season-strip">
               {tr(config.acts.map((act, index) => (
                 <button
