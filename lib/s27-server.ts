@@ -6,6 +6,7 @@ type RuntimeEnv = {
   DB?: D1Database;
   BOT_WEBHOOK_SECRET?: string;
   ADMIN_DISCORD_IDS?: string;
+  OWNER_DISCORD_IDS?: string;
   MANAGER_DISCORD_IDS?: string;
   SITE_BASE_URL?: string;
 };
@@ -107,7 +108,36 @@ export function isAdmin(discordId: string) {
   return discordId === "lab:admin" || adminIds().has(discordId);
 }
 
-export async function isManager(id:string){const row=await getD1().prepare("SELECT value FROM site_settings WHERE key='bridge:managers'").first<{value:string}>();return (row?JSON.parse(row.value):[]).includes(id)|| isAdmin(id)||id==='lab:manager'||new Set((getRuntimeValue('MANAGER_DISCORD_IDS')??'').split(',').map(x=>x.trim()).filter(Boolean)).has(id);}
+export function ownerIds() {
+  const configured = new Set(
+    (getRuntimeValue("OWNER_DISCORD_IDS") ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  return configured.size ? configured : adminIds();
+}
+
+async function storedRoleIds(key: "bridge:owners" | "bridge:admins" | "bridge:managers") {
+  const row = await getD1().prepare("SELECT value FROM site_settings WHERE key=?").bind(key).first<{value:string}>();
+  if (!row) return [] as string[];
+  try {
+    const value = JSON.parse(row.value);
+    return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [] as string[];
+  }
+}
+
+export async function isOwner(id: string) {
+  return id === "lab:admin" || ownerIds().has(id) || (await storedRoleIds("bridge:owners")).includes(id);
+}
+
+export async function hasAdminAccess(id: string) {
+  return (await isOwner(id)) || adminIds().has(id) || (await storedRoleIds("bridge:admins")).includes(id);
+}
+
+export async function isManager(id:string){return (await storedRoleIds("bridge:managers")).includes(id)||await hasAdminAccess(id)||id==='lab:manager'||new Set((getRuntimeValue('MANAGER_DISCORD_IDS')??'').split(',').map(x=>x.trim()).filter(Boolean)).has(id);}
 export async function maintenanceBlocked(id:string){if(await isManager(id))return false;const row=await getD1().prepare("SELECT value FROM site_settings WHERE key='site_config'").first<{value:string}>();if(!row)return false;try{return JSON.parse(row.value)?.maintenanceMode===true}catch{return false}}
 
 function constantTimeEqual(left: string, right: string) {
@@ -205,7 +235,8 @@ export async function profilePayload(discordId: string) {
   return {
     ...profile,
     pioneer: await db.prepare('SELECT 1+(SELECT COUNT(*) FROM site_registrations earlier WHERE earlier.id<r.id) AS number FROM site_registrations r WHERE user_id=? AND (SELECT COUNT(*) FROM site_registrations earlier WHERE earlier.id<r.id)<30').bind(discordId).first<{number:number}>(),
-    is_admin: isAdmin(discordId),
+    is_owner: await isOwner(discordId),
+    is_admin: await hasAdminAccess(discordId),
     is_editor: editorIds.has(discordId),
     is_manager: await isManager(discordId),
     is_test: discordId.startsWith("lab:"),
