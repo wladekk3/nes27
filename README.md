@@ -44,7 +44,8 @@ Add these GitHub Actions secrets to `wladekk3/nes27`:
 | `SITE_BASE_URL` | Exact production `workers.dev` origin, including the account subdomain |
 | `PREVIEW_SITE_BASE_URL` | Exact preview `workers.dev` origin, including the account subdomain |
 | `BOT_WEBHOOK_SECRET` | Shared HMAC secret used by the site and bot |
-| `ADMIN_DISCORD_IDS` | Comma-separated administrator Discord IDs |
+| `OWNER_DISCORD_IDS` | Comma-separated bootstrap owner IDs; protected from removal in the site UI |
+| `ADMIN_DISCORD_IDS` | Comma-separated bootstrap administrator IDs; used as owners until `OWNER_DISCORD_IDS` is configured |
 | `MANAGER_DISCORD_IDS` | Optional comma-separated manager Discord IDs |
 
 The workflow generates an ignored deployment config, applies migrations and deploys to:
@@ -75,6 +76,8 @@ Never commit database exports: they can contain session hashes and private Disco
 ## Maintenance mode
 
 Administrators control **MAINTENANCE MODE — ON / OFF** in the administration panel and save it to the server. Ordinary members then see the NE S27 maintenance screen. Administrators and managers retain access; the Discord bot continues using signed backend routes. Game, upgrader and code-redemption writes are blocked for ordinary members.
+
+Owners can manage owner, administrator and manager Discord IDs from the Discord bridge panel. Cloudflare bootstrap owners cannot be removed in the UI, and the API prevents removing the last owner or the active owner's own access.
 
 Recommended release flow:
 
