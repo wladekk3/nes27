@@ -14,6 +14,9 @@
   }],
   "vars": {
     "SITE_BASE_URL": "https://ne-s27-zone.r9d8npjbr7.workers.dev",
+    "OWNER_DISCORD_IDS": "",
+    "ADMIN_DISCORD_IDS": "",
+    "MANAGER_DISCORD_IDS": "",
     "ENABLE_TEST_LOGIN": "0"
   }
 }
