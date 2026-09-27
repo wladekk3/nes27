@@ -24,8 +24,8 @@ for (const key of required) {
 }
 
 const siteBaseUrl = process.env.SITE_BASE_URL.replace(/\/$/, "");
-const ticketCategoryId = process.env.TICKET_CATEGORY_ID?.trim() || "";
-const managerRoleId = process.env.MANAGER_ROLE_ID?.trim() || "";
+const ticketCategoryId = process.env.TICKET_CATEGORY_ID?.trim() || "1548442304271089766";
+const managerRoleId = process.env.MANAGER_ROLE_ID?.trim() || "1013182969994821762";
 const adminRoleIds = new Set(
   (process.env.ADMIN_ROLE_IDS ?? "")
     .split(",")
