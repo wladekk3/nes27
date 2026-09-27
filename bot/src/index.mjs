@@ -245,12 +245,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   try {
     if (interaction.commandName === "connect") {
-      if (!interaction.inGuild()) {
-        await interaction.reply({ content: "Команда работает только на сервере.", ephemeral: true });
+      const usedInGuild = interaction.inGuild();
+      await interaction.deferReply({ ephemeral: usedInGuild });
+      const guild = usedInGuild
+        ? interaction.guild
+        : await client.guilds.fetch(process.env.DISCORD_GUILD_ID);
+      let member;
+      try {
+        member = await guild.members.fetch(interaction.user.id);
+      } catch {
+        await interaction.editReply("Команда доступна участникам сервера NE S27. Сначала вступите на сервер.");
         return;
       }
-      await interaction.deferReply({ ephemeral: true });
-      const member = await interaction.guild.members.fetch(interaction.user.id);
       const result = await bridge("create_link", memberIdentity(member));
       const privateMessage = [
           "🔐 **Безопасное подключение аккаунта NE S27**",
@@ -258,6 +264,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
           `Откройте ссылку: ${result.connectUrl}`,
           "Код действует 10 минут и используется один раз. Пароль Discord нигде не вводится.",
         ].join("\n");
+      if (!usedInGuild) {
+        await interaction.editReply(privateMessage);
+        return;
+      }
       try {
         await interaction.user.send({content:privateMessage});
         await interaction.editReply("✅ Код и ссылка отправлены тебе в личные сообщения.");
