@@ -6,6 +6,7 @@ import {
   GatewayIntentBits,
   PermissionFlagsBits,
 } from "discord.js";
+import { commands } from "./commands.mjs";
 
 const required = [
   "DISCORD_BOT_TOKEN",
@@ -187,6 +188,13 @@ function profileText(profile) {
 
 client.once(Events.ClientReady, async (readyClient) => {
   const guild = await readyClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
+  if ((process.env.REGISTER_COMMANDS_ON_START ?? "true").toLowerCase() === "true") {
+    await Promise.all([
+      readyClient.application.commands.set(commands),
+      guild.commands.set(commands),
+    ]);
+    console.log(`Registered ${commands.length} NE S27 commands globally and in the guild.`);
+  }
   await refreshInvites(guild);
   readyClient.user.setActivity("NE S27 // ЗОНА", { type: ActivityType.Watching });
   console.log(`NE S27 bot online as ${readyClient.user.tag}`);
@@ -244,7 +252,8 @@ client.on(Events.GuildMemberUpdate, async (_oldMember, newMember) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   try {
-    if (interaction.commandName === "connect") {
+    if (["connect", "подключить"].includes(interaction.commandName)) {
+      const english = interaction.commandName === "connect";
       const usedInGuild = interaction.inGuild();
       await interaction.deferReply({ ephemeral: usedInGuild });
       const guild = usedInGuild
@@ -254,25 +263,38 @@ client.on(Events.InteractionCreate, async (interaction) => {
       try {
         member = await guild.members.fetch(interaction.user.id);
       } catch {
-        await interaction.editReply("Команда доступна участникам сервера NE S27. Сначала вступите на сервер.");
+        await interaction.editReply(english
+          ? "This command is available to NE S27 server members. Join the server first."
+          : "Команда доступна участникам сервера NE S27. Сначала вступите на сервер.");
         return;
       }
       const result = await bridge("create_link", memberIdentity(member));
-      const privateMessage = [
-          "🔐 **Безопасное подключение аккаунта NE S27**",
-          `Код: **${result.code}**`,
-          `Откройте ссылку: ${result.connectUrl}`,
-          "Код действует 10 минут и используется один раз. Пароль Discord нигде не вводится.",
-        ].join("\n");
+      const privateMessage = english
+        ? [
+            "🔐 **Secure NE S27 account connection**",
+            `Code: **${result.code}**`,
+            `Open the website: ${result.connectUrl}`,
+            "The code is valid for 10 minutes and can be used once. Never enter your Discord password.",
+          ].join("\n")
+        : [
+            "🔐 **Безопасное подключение аккаунта NE S27**",
+            `Код: **${result.code}**`,
+            `Откройте сайт: ${result.connectUrl}`,
+            "Код действует 10 минут и используется один раз. Никогда не вводите пароль Discord.",
+          ].join("\n");
       if (!usedInGuild) {
         await interaction.editReply(privateMessage);
         return;
       }
       try {
         await interaction.user.send({content:privateMessage});
-        await interaction.editReply("✅ Код и ссылка отправлены тебе в личные сообщения.");
+        await interaction.editReply(english
+          ? "✅ The code and link were sent to your direct messages."
+          : "✅ Код и ссылка отправлены тебе в личные сообщения.");
       } catch {
-        await interaction.editReply(`${privateMessage}\n\n⚠️ Личные сообщения закрыты, поэтому код показан только здесь.`);
+        await interaction.editReply(`${privateMessage}\n\n${english
+          ? "⚠️ Your direct messages are closed, so the code is shown only here."
+          : "⚠️ Личные сообщения закрыты, поэтому код показан только здесь."}`);
       }
       return;
     }

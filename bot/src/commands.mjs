@@ -6,6 +6,9 @@ import {
 export const commands = [
   new SlashCommandBuilder()
     .setName("connect")
+    .setDescription("Securely connect Discord to your NE S27 profile"),
+  new SlashCommandBuilder()
+    .setName("подключить")
     .setDescription("Безопасно подключить Discord к профилю NE S27"),
   new SlashCommandBuilder()
     .setName("profile")
