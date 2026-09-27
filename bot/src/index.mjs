@@ -1,7 +1,12 @@
 import { createHmac } from "node:crypto";
 import {
+  ActionRowBuilder,
   ActivityType,
+  ButtonBuilder,
+  ButtonStyle,
+  ChannelType,
   Client,
+  EmbedBuilder,
   Events,
   GatewayIntentBits,
   PermissionFlagsBits,
@@ -19,6 +24,8 @@ for (const key of required) {
 }
 
 const siteBaseUrl = process.env.SITE_BASE_URL.replace(/\/$/, "");
+const ticketCategoryId = process.env.TICKET_CATEGORY_ID?.trim() || "";
+const managerRoleId = process.env.MANAGER_ROLE_ID?.trim() || "";
 const adminRoleIds = new Set(
   (process.env.ADMIN_ROLE_IDS ?? "")
     .split(",")
@@ -46,6 +53,54 @@ const client = new Client({
 });
 
 let inviteUses = new Map();
+let provisioningClaims = false;
+
+const ticketMemberPermissions = [
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.SendMessages,
+  PermissionFlagsBits.ReadMessageHistory,
+  PermissionFlagsBits.AttachFiles,
+  PermissionFlagsBits.EmbedLinks,
+];
+
+function ticketTopic(orderId, userId) {
+  return `NE_S27_REWARD|order=${orderId}|user=${userId}`;
+}
+
+function ticketTopicValue(topic, key) {
+  const match = String(topic || "").match(new RegExp(`(?:^|\\|)${key}=([^|]+)`));
+  return match?.[1] || "";
+}
+
+function ticketName(member, orderId) {
+  const username = member.user.username
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32) || `user-${member.id.slice(-6)}`;
+  const suffix = String(orderId).replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(-18);
+  return `prize-${username}-${suffix}`.slice(0, 96);
+}
+
+function ticketManager(interaction) {
+  if (!interaction.inCachedGuild()) return false;
+  if (interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) return true;
+  return interaction.member.roles.cache.some((role) =>
+    role.id === managerRoleId || adminRoleIds.has(role.id),
+  );
+}
+
+function claimButton(orderId, disabled = false) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`prize_fulfilled:${orderId}`)
+      .setLabel(disabled ? "Награда выдана / Fulfilled" : "Подтвердить выдачу / Mark fulfilled")
+      .setEmoji(disabled ? "✅" : "🎁")
+      .setStyle(disabled ? ButtonStyle.Secondary : ButtonStyle.Success)
+      .setDisabled(disabled),
+  );
+}
 
 function memberIdentity(member) {
   return {
@@ -129,6 +184,101 @@ async function provisionRequestedInvites() {
   }
 }
 
+async function provisionPrizeTickets() {
+  if (provisioningClaims || !client.isReady()) return;
+  if (!ticketCategoryId || !managerRoleId) {
+    console.error("Prize tickets disabled: TICKET_CATEGORY_ID or MANAGER_ROLE_ID is missing");
+    return;
+  }
+  provisioningClaims = true;
+  try {
+    const guild = await client.guilds.fetch(process.env.DISCORD_GUILD_ID);
+    const channels = await guild.channels.fetch();
+    const { claims = [] } = await bridge("pending_claims");
+    for (const claim of claims) {
+      let channel;
+      let created = false;
+      try {
+        const member = await guild.members.fetch(claim.user_id);
+        if (member.user.bot) continue;
+        const topic = ticketTopic(claim.order_id, claim.user_id);
+        channel = channels.find((candidate) =>
+          candidate?.type === ChannelType.GuildText && candidate.topic === topic,
+        );
+        if (!channel) {
+          const managerOverwrites = [managerRoleId, ...adminRoleIds]
+            .filter((id, index, values) => id && values.indexOf(id) === index)
+            .map((id) => ({ id, allow: [...ticketMemberPermissions, PermissionFlagsBits.ManageMessages] }));
+          channel = await guild.channels.create({
+            name: ticketName(member, claim.order_id),
+            type: ChannelType.GuildText,
+            parent: ticketCategoryId,
+            topic,
+            reason: `NE S27 reward claim ${claim.order_id}`,
+            permissionOverwrites: [
+              { id: guild.roles.everyone.id, deny: [PermissionFlagsBits.ViewChannel] },
+              { id: member.id, allow: ticketMemberPermissions },
+              { id: client.user.id, allow: [...ticketMemberPermissions, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageMessages] },
+              ...managerOverwrites,
+            ],
+          });
+          channels.set(channel.id, channel);
+          created = true;
+        }
+
+        try {
+          const registered = await bridge("claim_ticket", {
+            orderId: claim.order_id,
+            ticketId: channel.id,
+          });
+          if (registered.ticketId !== channel.id) {
+            if (created) await channel.delete("Duplicate NE S27 reward ticket").catch(() => {});
+            continue;
+          }
+        } catch (error) {
+          const status = await bridge("claim_status", { orderId: claim.order_id }).catch(() => null);
+          if (status?.order?.ticket_id !== channel.id) {
+            if (created) await channel.delete("Duplicate or closed NE S27 reward ticket").catch(() => {});
+            throw error;
+          }
+        }
+
+        const latest = await channel.messages.fetch({ limit: 1 });
+        if (!latest.size) {
+          const embed = new EmbedBuilder()
+            .setColor(0xd6a548)
+            .setTitle("🎁 Получение награды NE S27")
+            .setDescription([
+              `${member}, заявка на получение награды создана.`,
+              "Менеджер свяжется с вами в этом закрытом канале.",
+              "",
+              `${member}, your reward claim has been created.`,
+              "A manager will contact you in this private channel.",
+            ].join("\n"))
+            .addFields(
+              { name: "Награда / Reward", value: String(claim.name || claim.product_id || "NE S27 prize").slice(0, 1024) },
+              { name: "Заявка / Claim", value: `\`${claim.order_id}\``.slice(0, 1024) },
+            )
+            .setFooter({ text: "NE S27 // REWARD PROTOCOL" })
+            .setTimestamp();
+          await channel.send({
+            content: `${member} <@&${managerRoleId}>`,
+            embeds: [embed],
+            components: [claimButton(claim.order_id)],
+            allowedMentions: { users: [member.id], roles: [managerRoleId] },
+          });
+        }
+      } catch (error) {
+        console.error(`Prize ticket failed for ${claim.order_id}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error("Prize ticket provisioning unavailable:", error);
+  } finally {
+    provisioningClaims = false;
+  }
+}
+
 async function publishNews(message) {
   if (!message.guildId || !newsChannelIds.has(message.channelId)) return;
   if (message.partial) message = await message.fetch();
@@ -170,7 +320,9 @@ async function backfillNews(client) {
 function hasAdminRole(interaction) {
   if (!interaction.inCachedGuild()) return false;
   if (interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) return true;
-  return interaction.member.roles.cache.some((role) => adminRoleIds.has(role.id));
+  return interaction.member.roles.cache.some((role) =>
+    role.id === managerRoleId || adminRoleIds.has(role.id),
+  );
 }
 
 function profileText(profile) {
@@ -200,6 +352,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   console.log(`NE S27 bot online as ${readyClient.user.tag}`);
   void backfillNews(readyClient);
   void provisionRequestedInvites();
+  void provisionPrizeTickets();
 });
 
 client.on(Events.MessageCreate, (message) => publishNews(message).catch((error) => console.error("News publish failed:", error)));
@@ -250,6 +403,43 @@ client.on(Events.GuildMemberUpdate, async (_oldMember, newMember) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.isButton() && interaction.customId.startsWith("prize_fulfilled:")) {
+    await interaction.deferReply({ ephemeral: true });
+    if (!ticketManager(interaction)) {
+      await interaction.editReply("❌ Подтвердить выдачу может только менеджер или администратор.");
+      return;
+    }
+    const orderId = interaction.customId.slice("prize_fulfilled:".length);
+    try {
+      try {
+        await bridge("claim_fulfilled", { orderId, actorDiscordId: interaction.user.id });
+      } catch (error) {
+        const status = await bridge("claim_status", { orderId }).catch(() => null);
+        if (status?.order?.status !== "fulfilled") throw error;
+      }
+      await interaction.message.edit({ components: [claimButton(orderId, true)] }).catch(() => {});
+      const channel = interaction.channel;
+      if (channel?.type === ChannelType.GuildText) {
+        const userId = ticketTopicValue(channel.topic, "user");
+        if (userId) {
+          await channel.permissionOverwrites.edit(userId, {
+            ViewChannel: true,
+            SendMessages: false,
+            ReadMessageHistory: true,
+          }).catch(() => {});
+        }
+        if (!channel.name.startsWith("closed-")) {
+          await channel.setName(`closed-${channel.name}`.slice(0, 100), "NE S27 reward fulfilled").catch(() => {});
+        }
+        await channel.send(`✅ **Награда выдана, заявка закрыта.**\n**Reward fulfilled. This claim is now closed.**`);
+      }
+      await interaction.editReply("✅ Выдача зафиксирована на сайте, тикет закрыт.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Неизвестная ошибка.";
+      await interaction.editReply(`❌ Не удалось закрыть заявку: ${message}`);
+    }
+    return;
+  }
   if (!interaction.isChatInputCommand()) return;
   try {
     if (["connect", "подключить"].includes(interaction.commandName)) {
@@ -396,6 +586,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 let verifying=false;
 setInterval(()=>void provisionRequestedInvites(),5000).unref();
+setInterval(
+  () => void provisionPrizeTickets(),
+  Math.max(5, Number(process.env.CLAIM_POLL_SECONDS) || 20) * 1000,
+).unref();
 setInterval(async () => {
  if(verifying)return;verifying=true;
  try {
