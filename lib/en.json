@@ -1308,5 +1308,72 @@
   "ЛИЧНАЯ ССЫЛКА СКОПИРОВАНА": "PERSONAL LINK COPIED",
   "Ошибка загрузки": "Loading error",
   "Ошибка создания ссылки": "Link creation error",
-  "Получи постоянную личную ссылку во вкладке «Пригласить» на сайте. Возраст Discord-аккаунта друга должен быть от 30 дней. Повторный вход ранее приглашённого участника не даёт новую награду. За двух подтверждённых друзей — один купон.": "Get your permanent personal link from the Invite tab on the website. Your friend's Discord account must be at least 30 days old. Rejoining does not grant another reward. Two verified friends earn one coupon."
+  "Получи постоянную личную ссылку во вкладке «Пригласить» на сайте. Возраст Discord-аккаунта друга должен быть от 30 дней. Повторный вход ранее приглашённого участника не даёт новую награду. За двух подтверждённых друзей — один купон.": "Get your permanent personal link from the Invite tab on the website. Your friend's Discord account must be at least 30 days old. Rejoining does not grant another reward. Two verified friends earn one coupon.",
+  "УНИКАЛЬНЫХ ПОСЕТИТЕЛЕЙ": "UNIQUE VISITORS",
+  "АККАУНТОВ СОЗДАНО": "ACCOUNTS CREATED",
+  "ОТЧЁТЫ ОБ ОШИБКАХ": "BUG REPORTS",
+  "ЗАКРЫТЬ ОТЧЁТ": "CLOSE REPORT",
+  "Новых отчётов нет.": "No new reports.",
+  "Открыт": "Open",
+  "Закрыт": "Closed",
+  "Гость": "Guest",
+  "Отчёт отправляется напрямую администрации NE S27 и появляется в админ-панели. Пароли, коды входа и личные данные не нужны.": "The report is sent directly to NE S27 administrators and appears in the admin panel. Passwords, login codes and personal information are not required.",
+  "ОТПРАВИТЬ ОТЧЁТ": "SEND REPORT",
+  "ОТПРАВЛЯЕМ…": "SENDING…",
+  "Отчёт отправлен администрации. Номер: ": "Report sent to the administrators. Reference: ",
+  "Не удалось отправить отчёт. Попробуйте позже.": "Could not send the report. Please try again later."
+  ," АДМИНИСТРАТОР": " ADMINISTRATOR"
+  ," АКТИВИРОВАТЬ КОД": " REDEEM CODE"
+  ," АРХИВНАЯ ТОЧКА ПОДТВЕРЖДЕНА": " ARCHIVE POINT CONFIRMED"
+  ," ВЫЙТИ ИЗ ПРОФИЛЯ": " SIGN OUT"
+  ," ВЫПОЛНЕНО": " COMPLETED"
+  ," ДОСТУП: РАЗДЕЛ «ИНФОРМАЦИЯ»": " ACCESS: INFORMATION SECTION"
+  ," ЖЕТОНОВ": " TOKENS"
+  ," ЖЕТОНОВ ЗОНЫ": " ZONE TOKENS"
+  ," ЗАЩИТА ОТ НАКРУТКИ": " ANTI-ABUSE PROTECTION"
+  ," ЗОНА АКТИВНА": " ZONE ACTIVE"
+  ," ИЗУЧИТЬ ХРОНИКУ ": " EXPLORE THE CHRONICLE "
+  ," КРАТКАЯ ЛИНИЯ ВРЕМЕНИ": " SHORT TIMELINE"
+  ," КУПЛЕНО": " PURCHASED"
+  ," МОИ КАРТОЧКИ": " MY CARDS"
+  ," МОИ ПРИГЛАШЕНИЯ": " MY INVITES"
+  ," ОВНЕР": " OWNER"
+  ," ОТКРЫТЬ ТАЙНИК ": " OPEN CACHE "
+  ," ПЕРЕДАЧА S27 // СЕЗОН 01": " S27 TRANSMISSION // SEASON 01"
+  ," ПОСЛЕДНИЕ НОВОСТИ": " LATEST NEWS"
+  ," ПРОТОКОЛ R-27": " PROTOCOL R-27"
+  ," РАСШИРЕННЫЕ ДОСЬЕ": " EXTENDED DOSSIERS"
+  ," СБРОСИТЬ": " RESET"
+  ," СВЕЖИЕ ЗАПИСИ": " LATEST ENTRIES"
+  ," СЕРВЕРНАЯ СВОДКА": " SERVER SUMMARY"
+  ," СИГНАЛ СТАБИЛЕН ": " SIGNAL STABLE "
+  ," СНАБЖЕНИЕ ЗОНЫ": " ZONE SUPPLIES"
+  ," ЭКОНОМИКА ЗОНЫ": " ZONE ECONOMY"
+  ,"Способ открытия и украшения не меняют шансы. Один тайник всегда даёт одну карту.": "Opening styles and cosmetics do not affect the odds. One cache always gives one card."
+  ," Способ открытия и украшения не меняют шансы. Один тайник всегда даёт одну карту.": " Opening styles and cosmetics do not affect the odds. One cache always gives one card."
+  ," активаций · ": " redemptions · "
+  ," бот и повторный вход не дают награду;": " bots and repeat joins do not grant rewards;"
+  ," жетонов": " tokens"
+  ," жетонов Зоны.": " Zone Tokens."
+  ," купонов": " coupons"
+  ," один Discord-аккаунт засчитывается один раз.": " each Discord account is counted once."
+  ," предметов · покупка один раз": " items · one-time purchase"
+  ," приглашения.": " invites."
+  ," учитывается только новый участник сервера;": " only new server members count;"
+  ,"В наличии: ": "Available: "
+  ,"ВСЯ ХРОНИКА ": "FULL CHRONICLE "
+  ,"До следующего купона: ": "Until the next coupon: "
+  ,"Защищённые ID из Cloudflare нельзя удалить через сайт: ": "Protected Cloudflare IDs cannot be removed through the site: "
+  ,"КАК ПОЛУЧИТЬ ": "HOW TO GET "
+  ,"КОД: ": "CODE: "
+  ,"Копий: ": "Copies: "
+  ,"ОТКРЫТЬ ": "OPEN "
+  ,"ПЕРЕЙТИ ": "GO TO "
+  ,"ПОЛУЧИТЬ ССЫЛКУ ": "GET LINK "
+  ,"ПРОГРЕСС: ": "PROGRESS: "
+  ,"Последний сигнал: ": "Last signal: "
+  ,"Собрано ": "Collected "
+  ,"ТАЙНИК ": "CACHE "
+  ,"Ты получишь ": "You will receive "
+  ,"ЧАСТЬ ": "PART "
 }

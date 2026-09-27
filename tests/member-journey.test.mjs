@@ -278,6 +278,14 @@ test('persisted member journey, role boundaries, purchases, grants and claims',a
  assert.equal((await call('/api/leaderboard',{userId:'223456789012345678',hidden:true},member)).status,403);
  assert.equal((await call('/api/leaderboard',{userId:'223456789012345678',hidden:true},admin)).status,200);
  assert.ok(!(await call('/api/leaderboard?metric=packs')).body.members.some(m=>m.username==='visitor_a'));
+ // Public counters have honest definitions: unique browser cookies and all non-test account profiles.
+ const stats=await call('/api/site-stats',{visit:true});assert.equal(stats.status,200);assert.equal(stats.body.visitors,1);assert.equal(stats.body.accounts,sql.prepare("SELECT COUNT(*) n FROM users WHERE discord_id NOT LIKE 'lab:%'").get().n);
+ // Bug reports persist, are visible to administrators, and only administrators can close them.
+ const report=await call('/api/bug-reports',{section:'Тайники',description:'Кнопка открытия не отвечает',userAgent:'Test browser',pageUrl:'/'});assert.equal(report.status,201);assert.match(report.body.id,/^[0-9a-f-]{36}$/);
+ const adminWithReports=await call('/api/admin',null,admin);assert.ok(adminWithReports.body.bugReports.some(item=>item.id===report.body.id&&item.status==='open'));
+ assert.equal((await call('/api/bug-reports',{action:'resolve',id:report.body.id},member)).status,403);
+ assert.equal((await call('/api/bug-reports',{action:'resolve',id:report.body.id},admin)).status,200);
+ assert.equal(sql.prepare('SELECT status FROM bug_reports WHERE id=?').get(report.body.id).status,'resolved');
  const hiddenSearch=await call('/api/leaderboard?admin=1&q=@visitor_a',null,admin);assert.equal(hiddenSearch.body.members.length,1);assert.equal(hiddenSearch.body.members[0].hidden,1);
  assert.equal((await call('/api/leaderboard',{userId:'223456789012345678',hidden:false},admin)).status,200);
  assert.equal((await call('/api/leaderboard?metric=packs')).body.members[0].score,87);

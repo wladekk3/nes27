@@ -27,6 +27,7 @@ export const siteRegistrations = sqliteTable('site_registrations', {
  createdAt: integer('created_at').notNull(),
 });
 export const siteVisitors = sqliteTable('site_visitors',{visitorId:text('visitor_id').primaryKey(),firstSeenAt:integer('first_seen_at').notNull(),lastSeenAt:integer('last_seen_at').notNull(),visits:integer('visits').notNull().default(1)});
+export const bugReports=sqliteTable('bug_reports',{id:text('id').primaryKey(),userId:text('user_id'),visitorId:text('visitor_id').notNull(),section:text('section').notNull(),description:text('description').notNull(),userAgent:text('user_agent').notNull(),pageUrl:text('page_url').notNull(),status:text('status').notNull().default('open'),createdAt:integer('created_at').notNull(),resolvedAt:integer('resolved_at')},t=>[index('idx_bug_reports_status_created').on(t.status,t.createdAt),index('idx_bug_reports_visitor_created').on(t.visitorId,t.createdAt)]);
 export const maintenanceRewards=sqliteTable('maintenance_rewards',{cycleId:text('cycle_id').notNull(),claimant:text('claimant').notNull(),codeId:text('code_id').notNull(),createdAt:integer('created_at').notNull()},t=>[primaryKey({columns:[t.cycleId,t.claimant]}),uniqueIndex('idx_maintenance_rewards_code').on(t.codeId)]);
 
 export const sessions = sqliteTable(

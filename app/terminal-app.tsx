@@ -155,6 +155,7 @@ type AdminSnapshot = {
     target_id?: string | null;
     created_at: number;
   }>;
+  bugReports: Array<{id:string;user_id:string|null;username:string|null;display_name:string|null;section:string;description:string;user_agent:string;page_url:string;status:string;created_at:number}>;
 };
 
 type ActConfig = {
@@ -648,6 +649,12 @@ export default function TerminalApp() {
   const [serverSaveBusy, setServerSaveBusy] = useState(false);
   const [siteStats,setSiteStats]=useState({visitors:0,accounts:0});
 
+  async function resolveBugReport(id:string){
+    const response=await fetch('/api/bug-reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'resolve',id})});
+    if(!response.ok)return;
+    setAdminSnapshot(previous=>previous?{...previous,bugReports:previous.bugReports.map(report=>report.id===id?{...report,status:'resolved'}:report)}:previous);
+  }
+
   function applyAccount(profile: AccountProfile) {
     window.dispatchEvent(new Event("s27-account-changed"));
     setAccount(profile);
@@ -1113,7 +1120,7 @@ export default function TerminalApp() {
 
             <div className="home-section-label"><span>{tr("СЕЗОНЫ NE S27")}</span><small>{tr("ОДНА ЗОНА // НОВАЯ ГЛАВА")}</small></div>
             <GuildPulse/>
-            <section className="site-counter panel"><span><Users/><b>{siteStats.visitors.toLocaleString(locale)}</b><small>{locale==='en'?'UNIQUE VISITORS':'ЛЮДЕЙ ЗАШЛО'}</small></span><span><Fingerprint/><b>{siteStats.accounts.toLocaleString(locale)}</b><small>{locale==='en'?'ACCOUNTS CREATED':'АККАУНТОВ СОЗДАНО'}</small></span></section>
+            <section className="site-counter panel"><span title={locale==='en'?'Unique browsers that opened the production site':'Уникальные браузеры, открывшие production-сайт'}><Users/><b>{siteStats.visitors.toLocaleString(locale)}</b><small>{locale==='en'?'UNIQUE VISITORS':'УНИКАЛЬНЫХ ПОСЕТИТЕЛЕЙ'}</small></span><span title={locale==='en'?'All non-test NE S27 profiles in the live database':'Все реальные профили NE S27 в рабочей базе'}><Fingerprint/><b>{siteStats.accounts.toLocaleString(locale)}</b><small>{locale==='en'?'ACCOUNTS CREATED':'АККАУНТОВ СОЗДАНО'}</small></span></section>
             <section className="season-strip">
               {tr(config.acts.map((act, index) => (
                 <button
@@ -1575,6 +1582,7 @@ export default function TerminalApp() {
                 </div>
               </section>
             ) : null)}
+            {tr(account?.is_admin&&adminSnapshot&&<section className="panel order-list"><h2>{tr("ОТЧЁТЫ ОБ ОШИБКАХ")}</h2>{tr(adminSnapshot.bugReports.length?adminSnapshot.bugReports.map(report=><article key={report.id}><b>{tr(report.section)}</b><p>{tr(report.description)}</p><small>{tr(report.display_name||report.username||report.user_id||'Гость')} · {tr(new Date(report.created_at).toLocaleString(locale))} · {tr(report.status==='open'?'Открыт':'Закрыт')}</small>{tr(report.page_url&&<code>{tr(report.page_url)}</code>)}{tr(report.status==='open'&&<Button variant="outline" onClick={()=>resolveBugReport(report.id)}>{tr("ЗАКРЫТЬ ОТЧЁТ")}</Button>)}</article>):<p>{tr("Новых отчётов нет.")}</p>)}</section>)}
             </>}
 
             {adminTab==='appearance'&&

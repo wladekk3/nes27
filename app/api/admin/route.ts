@@ -1,4 +1,5 @@
 import { getD1, getSessionUser, hasAdminAccess } from "@/lib/s27-server";
+import {ensureBugReportsTable} from '@/lib/bug-reports';
 
 const defaultActs=[{number:'I',title:'СЕЗОН STALKER',status:'АКТИВНА',progress:0,text:'Сюжет будет объявлен позже.'},{number:'II',title:'СКОРО',status:'ЗАКРЫТА',progress:0,text:'Следующая часть пока не объявлена.'},{number:'III',title:'СКОРО',status:'ЗАКРЫТА',progress:0,text:'Подробности появятся в новостях.'}];
 const defaultNews = [
@@ -98,9 +99,10 @@ export async function GET(request: Request) {
     const admin = await requireAdmin(request);
     if (!admin) return Response.json({ error: "Доступ администратора не подтверждён." }, { status: 403 });
     const db = getD1();
+    await ensureBugReportsTable();
 
-    const [users, cards, referrals, settings, audit] = await Promise.all([
-      db.prepare("SELECT COUNT(*) AS count FROM users").first<{ count: number }>(),
+    const [users, cards, referrals, settings, audit, bugReports] = await Promise.all([
+      db.prepare("SELECT COUNT(*) AS count FROM users WHERE discord_id NOT LIKE 'lab:%'").first<{ count: number }>(),
       db
         .prepare("SELECT COALESCE(SUM(count), 0) AS count FROM user_cards")
         .first<{ count: number }>(),
@@ -118,6 +120,7 @@ export async function GET(request: Request) {
           "SELECT actor_id, action, target_id, payload, created_at FROM audit_log ORDER BY id DESC LIMIT 20",
         )
         .all(),
+      db.prepare("SELECT b.id,b.user_id,u.username,u.display_name,b.section,b.description,b.user_agent,b.page_url,b.status,b.created_at FROM bug_reports b LEFT JOIN users u ON u.discord_id=b.user_id ORDER BY CASE b.status WHEN 'open' THEN 0 ELSE 1 END,b.created_at DESC LIMIT 100").all(),
     ]);
     return Response.json({
       stats: {
@@ -128,6 +131,7 @@ export async function GET(request: Request) {
       },
       settings: Object.fromEntries(settings.results.map((row) => [row.key, row.value])),
       audit: audit.results,
+      bugReports: bugReports.results,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "CMS unavailable.";
