@@ -1,4 +1,4 @@
-import { getD1, getSessionUser, isAdmin } from "@/lib/s27-server";
+import { getD1, getSessionUser, hasAdminAccess } from "@/lib/s27-server";
 
 const defaultActs=[{number:'I',title:'СЕЗОН STALKER',status:'АКТИВНА',progress:0,text:'Сюжет будет объявлен позже.'},{number:'II',title:'СКОРО',status:'ЗАКРЫТА',progress:0,text:'Следующая часть пока не объявлена.'},{number:'III',title:'СКОРО',status:'ЗАКРЫТА',progress:0,text:'Подробности появятся в новостях.'}];
 const defaultNews = [
@@ -89,7 +89,7 @@ function sanitizeSiteConfig(input: unknown, reward: number, holdDays: number) {
 
 async function requireAdmin(request: Request) {
   const user = await getSessionUser(request);
-  if (!user || !isAdmin(user.discord_id)) return null;
+  if (!user || !(await hasAdminAccess(user.discord_id))) return null;
   return user;
 }
 
