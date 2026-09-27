@@ -15,7 +15,7 @@ export const commands = [
     .setDescription("Показать краткую сводку коллекции"),
   new SlashCommandBuilder()
     .setName("invite")
-    .setDescription("Создать личное приглашение и получать токены"),
+    .setDescription("Получить постоянное личное приглашение"),
   new SlashCommandBuilder()
     .setName("s27-help")
     .setDescription("Показать команды и правила системы"),

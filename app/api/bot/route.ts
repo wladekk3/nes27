@@ -144,15 +144,24 @@ export async function POST(request: Request) {
         return Response.json({ error: "discordId and inviteCode are required" }, { status: 400 });
       }
       await upsertDiscordUser(payload);
-      await db
-        .prepare(
-          `INSERT INTO referral_invites (invite_code, referrer_user_id, created_at)
-           VALUES (?, ?, ?)
-           ON CONFLICT(invite_code) DO UPDATE SET referrer_user_id = excluded.referrer_user_id`,
-        )
-        .bind(payload.inviteCode, payload.discordId, now)
-        .run();
-      return Response.json({ ok: true });
+      const existing=await db.prepare('SELECT invite_code FROM referral_invites WHERE referrer_user_id=? ORDER BY created_at ASC LIMIT 1').bind(payload.discordId).first<{invite_code:string}>();
+      const inviteCode=existing?.invite_code||payload.inviteCode;
+      await db.batch([
+        db.prepare(`INSERT INTO referral_invites (invite_code, referrer_user_id, created_at) VALUES (?, ?, ?) ON CONFLICT(invite_code) DO NOTHING`).bind(inviteCode,payload.discordId,now),
+        db.prepare(`INSERT INTO referral_invite_requests(user_id,status,error,created_at,updated_at) VALUES (?,'ready',NULL,?,?) ON CONFLICT(user_id) DO UPDATE SET status='ready',error=NULL,updated_at=excluded.updated_at`).bind(payload.discordId,now,now),
+      ]);
+      return Response.json({ok:true,inviteCode,inviteUrl:`https://discord.gg/${inviteCode}`});
+    }
+
+    if(payload.action==='get_referral_invite'){
+      if(!payload.discordId)return Response.json({error:'discordId is required'},{status:400});
+      const invite=await db.prepare('SELECT invite_code FROM referral_invites WHERE referrer_user_id=? ORDER BY created_at ASC LIMIT 1').bind(payload.discordId).first<{invite_code:string}>();
+      return Response.json(invite?{status:'ready',inviteCode:invite.invite_code,inviteUrl:`https://discord.gg/${invite.invite_code}`}:{status:'missing'});
+    }
+
+    if(payload.action==='pending_invite_requests'){
+      const rows=await db.prepare(`SELECT r.user_id FROM referral_invite_requests r LEFT JOIN referral_invites i ON i.referrer_user_id=r.user_id WHERE r.status='pending' AND i.invite_code IS NULL ORDER BY r.updated_at LIMIT 25`).all();
+      return Response.json({requests:rows.results});
     }
 
     if (payload.action === "referral_join") {

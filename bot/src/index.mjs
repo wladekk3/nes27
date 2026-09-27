@@ -83,6 +83,51 @@ async function refreshInvites(guild) {
   return invites;
 }
 
+async function ensurePersonalInvite(guild, member, channelId) {
+  const existing = await bridge("get_referral_invite", { discordId: member.id });
+  if (existing.status === "ready") return existing;
+  const invite = await guild.invites.create(channelId, {
+    maxAge: 0,
+    maxUses: 0,
+    unique: true,
+    reason: `NE S27 permanent referral for ${member.id}`,
+  });
+  inviteUses.set(invite.code, invite.uses ?? 0);
+  const registered = await bridge("register_invite", {
+    ...memberIdentity(member),
+    inviteCode: invite.code,
+  });
+  if (registered.inviteCode !== invite.code) {
+    await invite.delete("Duplicate NE S27 personal invite").catch(() => {});
+    inviteUses.delete(invite.code);
+  }
+  return registered;
+}
+
+let provisioningInvites = false;
+async function provisionRequestedInvites() {
+  if (provisioningInvites) return;
+  provisioningInvites = true;
+  try {
+    const channelId = process.env.INVITE_CHANNEL_ID;
+    if (!channelId) throw new Error("INVITE_CHANNEL_ID is not configured");
+    const guild = await client.guilds.fetch(process.env.DISCORD_GUILD_ID);
+    const {requests} = await bridge("pending_invite_requests");
+    for (const row of requests) {
+      try {
+        const member = await guild.members.fetch(row.user_id);
+        if (!member.user.bot) await ensurePersonalInvite(guild, member, channelId);
+      } catch (error) {
+        console.error(`Personal invite failed for ${row.user_id}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error("Personal invite provisioning unavailable:", error);
+  } finally {
+    provisioningInvites = false;
+  }
+}
+
 async function publishNews(message) {
   if (!message.guildId || !newsChannelIds.has(message.channelId)) return;
   if (message.partial) message = await message.fetch();
@@ -146,6 +191,7 @@ client.once(Events.ClientReady, async (readyClient) => {
   readyClient.user.setActivity("NE S27 // ЗОНА", { type: ActivityType.Watching });
   console.log(`NE S27 bot online as ${readyClient.user.tag}`);
   void backfillNews(readyClient);
+  void provisionRequestedInvites();
 });
 
 client.on(Events.MessageCreate, (message) => publishNews(message).catch((error) => console.error("News publish failed:", error)));
@@ -251,21 +297,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const member = await interaction.guild.members.fetch(interaction.user.id);
       await bridge("sync_member", memberIdentity(member));
       const channelId = process.env.INVITE_CHANNEL_ID || interaction.channelId;
-      const invite = await interaction.guild.invites.create(channelId, {
-        maxAge: 0,
-        maxUses: 0,
-        unique: true,
-        reason: `NE S27 referral for ${interaction.user.id}`,
-      });
-      inviteUses.set(invite.code, invite.uses ?? 0);
-      await bridge("register_invite", {
-        ...memberIdentity(member),
-        inviteCode: invite.code,
-      });
+      const invite = await ensurePersonalInvite(interaction.guild, member, channelId);
       await interaction.editReply(
         [
           "📡 **Личное приглашение NE S27**",
-          invite.url,
+          invite.inviteUrl,
           "После вступления нового участника начнётся проверка. Боты, повторные входы и самоприглашения награду не дают.",
         ].join("\n"),
       );
@@ -327,6 +363,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 let verifying=false;
+setInterval(()=>void provisionRequestedInvites(),5000).unref();
 setInterval(async () => {
  if(verifying)return;verifying=true;
  try {

@@ -1294,5 +1294,19 @@
   "Арканоид NE S27 · цикл": "NE S27 Arkanoid · cycle",
   "Функция образов удалена": "Presets are no longer available",
   "Укажите @ник пригласившего": "Enter the inviter's @username",
-  "Ошибка приглашения": "Invitation error"
+  "Ошибка приглашения": "Invitation error",
+  "Получите на сайте одну постоянную личную ссылку. За каждых двух проверенных новых участников начисляется один купон.": "Get one permanent personal link on the website. Every two verified new members earn one coupon.",
+  "Нажмите кнопку ниже. Бот создаст бессрочную ссылку только для вашего аккаунта и навсегда закрепит её за вами. Все вступившие по ней участники будут учитываться автоматически.": "Press the button below. The bot will create a permanent link exclusively for your account and assign it to you forever. Everyone joining through it will be tracked automatically.",
+  "Войдите в профиль, чтобы получить личную ссылку.": "Sign in to get your personal link.",
+  "Подключите Discord: личная ссылка доступна только участникам сервера.": "Connect Discord: personal links are available only to server members.",
+  "Личная ссылка-приглашение Discord": "Personal Discord invite link",
+  "СКОПИРОВАТЬ ЛИЧНУЮ ССЫЛКУ": "COPY PERSONAL LINK",
+  "ОТКРЫТЬ ССЫЛКУ ": "OPEN LINK ",
+  "Бот создаёт вашу постоянную ссылку… Обычно это занимает несколько секунд.": "The bot is creating your permanent link… This usually takes a few seconds.",
+  "ПОЛУЧИТЬ ЛИЧНУЮ ССЫЛКУ": "GET PERSONAL LINK",
+  "Ссылка закрепляется за вашим Discord навсегда. Повторный запрос вернёт ту же ссылку.": "The link is permanently assigned to your Discord. Repeated requests return the same link.",
+  "ЛИЧНАЯ ССЫЛКА СКОПИРОВАНА": "PERSONAL LINK COPIED",
+  "Ошибка загрузки": "Loading error",
+  "Ошибка создания ссылки": "Link creation error",
+  "Получи постоянную личную ссылку во вкладке «Пригласить» на сайте. Возраст Discord-аккаунта друга должен быть от 30 дней. Повторный вход ранее приглашённого участника не даёт новую награду. За двух подтверждённых друзей — один купон.": "Get your permanent personal link from the Invite tab on the website. Your friend's Discord account must be at least 30 days old. Rejoining does not grant another reward. Two verified friends earn one coupon."
 }

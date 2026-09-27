@@ -90,6 +90,18 @@ export const referralInvites = sqliteTable(
   (table) => [index("idx_referral_invites_referrer").on(table.referrerUserId)],
 );
 
+export const referralInviteRequests = sqliteTable(
+  "referral_invite_requests",
+  {
+    userId: text("user_id").primaryKey().references(() => users.discordId, { onDelete: "cascade" }),
+    status: text("status").notNull().default("pending"),
+    error: text("error"),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [index("idx_referral_invite_requests_status").on(table.status, table.updatedAt)],
+);
+
 export const referrals = sqliteTable(
   "referrals",
   {

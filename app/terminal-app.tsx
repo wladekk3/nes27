@@ -20,6 +20,7 @@ import { CacheReveal } from './cache-reveal';
 import {BridgePanel} from './bridge-panel';
 import {LanguageSwitch,useLanguage} from './language';
 import {ReferralConnect} from './referral-connect';
+import {PersonalInvite} from './personal-invite';
 import {CodeRedeem,ManagerHub} from './code-hub';
 import {GuildPulse} from './guild-pulse';
 import {MaintenanceGate} from './maintenance-gate';
@@ -187,7 +188,6 @@ type SiteConfig = {
   news: NewsItem[];
 };
 
-const inviteUrl = "https://discord.gg/FnQMBUXFqt";
 
 const publicCards: CardData[] = [
   {
@@ -881,15 +881,6 @@ export default function TerminalApp() {
     flash("ПРИГЛАШЕНИЕ ПОДТВЕРЖДЕНО. За каждых двух — один купон.");
   }
 
-  async function copyInvite() {
-    try {
-      await navigator.clipboard.writeText(inviteUrl);
-      flash("ССЫЛКА СКОПИРОВАНА");
-    } catch {
-      flash("СКОПИРУЙТЕ ССЫЛКУ ИЗ ПОЛЯ");
-    }
-  }
-
   function completeMission(id: string) {
     if (demo.claimed.includes(id)) return;
     setDemo((previous) => ({ ...previous, claimed: [...previous.claimed, id] }));
@@ -1070,7 +1061,7 @@ export default function TerminalApp() {
         </aside>
       ) : null)}
 
-      <main className="portal-main">{(view==='invite'||view==='home')&&<ReferralConnect incomingOnly={view==='home'} account={account} onAccount={applyAccount}/>}{tr(view==='home'&&<div className="home-code-access"><Button variant="outline" onClick={()=>setCodeOpen(v=>!v)} aria-expanded={codeOpen}><Gift/> {tr(" АКТИВИРОВАТЬ КОД")}</Button>{tr(codeOpen&&<CodeRedeem account={account} onAccount={applyAccount} onLogin={()=>setLoginOpen(true)}/>)}</div>)}{tr(view==='admin'&&account?.is_admin&&<BridgePanel/>)}
+      <main className="portal-main">{view==='home'&&<ReferralConnect incomingOnly account={account} onAccount={applyAccount}/>}{tr(view==='home'&&<div className="home-code-access"><Button variant="outline" onClick={()=>setCodeOpen(v=>!v)} aria-expanded={codeOpen}><Gift/> {tr(" АКТИВИРОВАТЬ КОД")}</Button>{tr(codeOpen&&<CodeRedeem account={account} onAccount={applyAccount} onLogin={()=>setLoginOpen(true)}/>)}</div>)}{tr(view==='admin'&&account?.is_admin&&<BridgePanel/>)}
         {tr(notice ? <div className="notice-bar">{tr(notice)}</div> : null)}
         {account?.is_editor&&<p className="editor-status">{locale==='en'?'EDITOR':'РЕДАКТОР'} · @{account.username}</p>}
         {view==='leaders'&&<Leaderboard/>}
@@ -1466,21 +1457,14 @@ export default function TerminalApp() {
               index="06"
               eyebrow="РЕФЕРАЛЬНАЯ СВЯЗЬ"
               title={tr("ПРИГЛАСИТЬ ДРУГА")}
-              text={`Личную отслеживаемую ссылку выдаёт команда /invite. За каждых двух проверенных новых участников начисляется один купон.`}
+              text={`Получите на сайте одну постоянную личную ссылку. За каждых двух проверенных новых участников начисляется один купон.`}
             />
             <section className="referral-hero panel">
               <div className="referral-copy">
                 <span className="referral-badge"><UserPlus /> {tr(" ПРОТОКОЛ R-27")}</span>
                 <h2>{tr("ПРИВЕДИ ДРУГА В ЗОНУ")}</h2>
-                <p>{tr("Вызови /invite в Discord. Бот создаст личную ссылку и запомнит, кто по ней присоединился. Общая ссылка ниже подходит для входа, но не начисляет награду.")}</p>
-                <div className="invite-field">
-                  <input value={inviteUrl} readOnly aria-label={tr("Ссылка-приглашение Discord")} />
-                  <button onClick={copyInvite} type="button" aria-label={tr("Копировать ссылку")}><Copy /></button>
-                </div>
-                <div className="referral-actions">
-                  <a className="outline-link primary-link" href={inviteUrl} target="_blank" rel="noreferrer">{tr("ОТКРЫТЬ DISCORD И ВЫЗВАТЬ /invite ")}<ExternalLink /></a>
-                  <Button variant="outline" className="reset-button" onClick={copyInvite}><Copy /> {tr(" ОБЩАЯ ССЫЛКА")}</Button>
-                </div>
+                <p>{tr("Нажмите кнопку ниже. Бот создаст бессрочную ссылку только для вашего аккаунта и навсегда закрепит её за вами. Все вступившие по ней участники будут учитываться автоматически.")}</p>
+                <PersonalInvite account={account} onMessage={flash}/>
               </div>
               <div className="referral-reward">
                 <div className="token-medal"><Ticket /><b>+1</b></div>
