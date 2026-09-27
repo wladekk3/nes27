@@ -4,7 +4,7 @@ import {verifyReferral,trackReferral,eligibleDiscordAccount} from '@/lib/referra
 import {
   getD1,
   getRuntimeValue,
-  isAdmin,
+  hasAdminAccess,
   isManager,
   profilePayload,
   randomLinkCode,
@@ -198,7 +198,7 @@ export async function POST(request: Request) {
       const actor = payload.actorDiscordId ?? "";
       const target = payload.discordId ?? "";
       const amount = Math.trunc(Number(payload.amount));
-      if (!isAdmin(actor)) return Response.json({ error: "Admin access denied." }, { status: 403 });
+      if (!(await hasAdminAccess(actor))) return Response.json({ error: "Admin access denied." }, { status: 403 });
       if (!target || !Number.isFinite(amount) || amount === 0 || Math.abs(amount) > 1000) {
         return Response.json({ error: "Invalid target or amount." }, { status: 400 });
       }
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
 
     if (payload.action === "admin_verify_referral") {
       const actor = payload.actorDiscordId ?? "";
-      if (!isAdmin(actor)) return Response.json({ error: "Admin access denied." }, { status: 403 });
+      if (!(await hasAdminAccess(actor))) return Response.json({ error: "Admin access denied." }, { status: 403 });
       const referred = payload.joinedDiscordId ?? "";
       const referral = await db
         .prepare(
